@@ -1,0 +1,110 @@
+-- =========================================
+-- 1) Création de la base de données
+-- =========================================
+CREATE DATABASE shop_db;
+
+-- =========================================
+-- 2) Extension UUID
+-- =========================================
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- =========================================
+-- 3) Type ENUM pour les rôles
+-- =========================================
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role') THEN
+    CREATE TYPE user_role AS ENUM ('super_admin', 'admin', 'seller', 'customer');
+  END IF;
+END $$;
+
+-- =========================================
+-- 4) Fonction pour updated_at
+-- =========================================
+CREATE OR REPLACE FUNCTION set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = CURRENT_TIMESTAMP;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- =========================================
+-- 5) Table users
+-- =========================================
+CREATE TABLE IF NOT EXISTS users (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  email VARCHAR(100) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  first_name VARCHAR(50),
+  last_name VARCHAR(50),
+  phone VARCHAR(20),
+  role user_role DEFAULT 'customer',
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TRIGGER update_users_updated_at
+BEFORE UPDATE ON users
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
+-- =========================================
+-- 6) Table shops
+-- =========================================
+CREATE TABLE IF NOT EXISTS shops (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name VARCHAR(100) NOT NULL,
+  description TEXT,
+  owner_id UUID NOT NULL,
+  is_verified BOOLEAN DEFAULT false,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_shops_owner FOREIGN KEY (owner_id)
+    REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- =========================================
+-- 7) Table products
+-- =========================================
+CREATE TABLE IF NOT EXISTS products (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name VARCHAR(200) NOT NULL,
+  description TEXT,
+  price DECIMAL(10, 2) NOT NULL CHECK (price >= 0),
+  stock_quantity INT DEFAULT 0 CHECK (stock_quantity >= 0),
+  shop_id UUID NOT NULL,
+  category VARCHAR(50),
+  images JSONB,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_products_shop FOREIGN KEY (shop_id)
+    REFERENCES shops(id) ON DELETE CASCADE
+);
+
+CREATE TRIGGER update_products_updated_at
+BEFORE UPDATE ON products
+FOR EACH ROW
+EXECUTE FUNCTION set_updated_at();
+
+-- =========================================
+-- 8) Indexes (performances)
+-- =========================================
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+CREATE INDEX IF NOT EXISTS idx_products_shop_id ON products(shop_id);
+CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
+
+-- =========================================
+-- 9) Super admin par défaut
+-- =========================================
+INSERT INTO users (email, password, first_name, last_name, role)
+VALUES (
+  'superadmin@shop.com',
+  '$2b$10$YourHashedPasswordHere',
+  'Super',
+  'Admin',
+  'super_admin'
+)
+ON CONFLICT (email) DO NOTHING;
