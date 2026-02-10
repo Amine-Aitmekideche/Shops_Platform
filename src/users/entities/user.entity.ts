@@ -1,3 +1,4 @@
+// src/users/entities/user.entity.ts (pour PostgreSQL)
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 export enum UserRole {
@@ -7,10 +8,10 @@ export enum UserRole {
   CUSTOMER = 'customer'
 }
 
-@Entity()
+@Entity('users')
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;  // UUID au lieu de number
 
   @Column({ unique: true })
   email: string;
@@ -18,10 +19,10 @@ export class User {
   @Column()
   password: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'first_name', nullable: true })
   firstName: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'last_name', nullable: true })
   lastName: string;
 
   @Column({ nullable: true })
@@ -34,12 +35,12 @@ export class User {
   })
   role: UserRole;
 
-  @Column({ default: true })
+  @Column({ name: 'is_active', default: true })
   isActive: boolean;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }

@@ -34,19 +34,19 @@ export class AuthService {
       password: hashedPassword,
     });
 
-    await this.usersRepository.save(user);
+    const savedUser = await this.usersRepository.save(user);
 
     // Générer le token JWT
     const payload = { 
-      sub: user.id, 
-      email: user.email, 
-      role: user.role 
+      sub: savedUser.id, 
+      email: savedUser.email, 
+      role: savedUser.role 
     };
     
     const access_token = this.jwtService.sign(payload);
 
     // Ne pas renvoyer le mot de passe
-    const { password, ...userWithoutPassword } = user;
+    const { password, ...userWithoutPassword } = savedUser;
 
     return {
       access_token,
@@ -94,7 +94,9 @@ export class AuthService {
     };
   }
 
-  async validateUser(payload: any): Promise<User> {
-    return this.usersRepository.findOne({ where: { id: payload.sub } });
+  async validateUser(payload: any): Promise<User | null> {
+    return await this.usersRepository.findOne({ 
+      where: { id: payload.sub } 
+    });
   }
 }

@@ -1,3 +1,12 @@
+// src/users/dto/create-user.dto.ts
+export class CreateUserDto {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phone?: string;
+  role?: 'super_admin' | 'admin' | 'seller' | 'customer';
+}
 import { IsEmail, IsString, MinLength, IsOptional, IsEnum } from 'class-validator';
 import { UserRole } from '../../users/entities/user.entity';
 
