@@ -1,5 +1,6 @@
 // src/users/entities/user.entity.ts (pour PostgreSQL)
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Shop } from 'src/shops/entities/shop.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 
 export enum UserRole {
   SUPER_ADMIN = 'super_admin',
@@ -43,4 +44,8 @@ export class User {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  // Relation avec les shops
+  @OneToMany(() => Shop, (shop) => shop.owner)
+  shops: Shop[];
 }
