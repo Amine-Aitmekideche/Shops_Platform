@@ -6,6 +6,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ShopsService } from '../shops/shops.service';
 import { Product } from './entities/product.entity';
+import { Between, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
 
 @Injectable()
 export class ProductsService {
@@ -32,23 +33,28 @@ export class ProductsService {
     return await this.productsRepository.save(product);
   }
 
+
   async findAll(query: any = {}): Promise<Product[]> {
     const { shopId, category, minPrice, maxPrice } = query;
     const where: any = { isActive: true };
 
     if (shopId) where.shopId = shopId;
     if (category) where.category = category;
-    if (minPrice || maxPrice) {
-      where.price = {};
-      if (minPrice) where.price.$gte = parseFloat(minPrice);
-      if (maxPrice) where.price.$lte = parseFloat(maxPrice);
+
+    if (minPrice && maxPrice) {
+      where.price = Between(Number(minPrice), Number(maxPrice));
+    } else if (minPrice) {
+      where.price = MoreThanOrEqual(Number(minPrice));
+    } else if (maxPrice) {
+      where.price = LessThanOrEqual(Number(maxPrice));
     }
 
-    return await this.productsRepository.find({
+    return this.productsRepository.find({
       where,
       relations: ['shop'],
     });
   }
+
 
   async findOne(id: string): Promise<Product> {
     const product = await this.productsRepository.findOne({
@@ -75,14 +81,20 @@ export class ProductsService {
     return await this.productsRepository.save(product);
   }
 
-  async remove(id: string, userId: string, userRole: string): Promise<void> {
+  async remove(id: string, userId: string, userRole: string): Promise<{message : string}> {
     const product = await this.findOne(id);
     
     if (product.shop.ownerId !== userId && !['super_admin', 'admin'].includes(userRole)) {
       throw new ForbiddenException('You can only delete products from your own shops');
     }
 
-    await this.productsRepository.delete(id);
+    const result = await this.productsRepository.delete(id);
+
+    if (result.affected === 0) {
+      throw new NotFoundException('Product not found or already deleted');
+    }
+
+    return { message: 'Product deleted successfully' };
   }
 
   async updateStock(id: string, quantity: number, userId: string, userRole: string): Promise<Product> {

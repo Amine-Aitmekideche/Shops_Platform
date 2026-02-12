@@ -10,7 +10,7 @@ import { ShopsModule } from 'src/shops/shops.module';
   imports: [
     TypeOrmModule.forFeature([Product]), // ✅ permet à @InjectRepository(Product) de fonctionner
     ShopsModule,                         // ✅ injecter ShopsService
-    ],
+  ],
   controllers: [ProductsController],
   providers: [ProductsService],
   exports: [ProductsService],

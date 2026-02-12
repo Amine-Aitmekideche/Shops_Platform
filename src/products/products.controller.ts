@@ -28,6 +28,8 @@ export class ProductsController {
     @Request() req,
     @Query('shopId') shopId: string,
   ) {
+    // const shopId = createProductDto.shopId; // Récupère shopId depuis le DTO
+    console.log('Creating product with data:', createProductDto, 'for shopId:', shopId, 'by user:', req.user);
     if (!shopId) {
       throw new ForbiddenException('shopId is required');
     }
@@ -62,6 +64,7 @@ export class ProductsController {
     @Body() updateProductDto: UpdateProductDto,
     @Request() req,
   ) {
+    console.log('Updating product with id:', id, 'and data:', updateProductDto, 'by user:', req.user);
     return this.productsService.update(
       id,
       updateProductDto,
