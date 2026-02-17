@@ -4,11 +4,10 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { databaseConfig } from './config/database.config';
-import { ShopsModule } from './shops/shops.module';
 import { ProductsModule } from './products/products.module';
 import { CartModule } from './cart/cart.module';
-import { OrdersService } from './orders/orders.service';
 import { OrdersModule } from './orders/orders.module';
+import { ShopsModule } from './shops/shops.module';
 
 @Module({
   imports: [
@@ -24,8 +23,9 @@ import { OrdersModule } from './orders/orders.module';
     ProductsModule,
     CartModule,
     OrdersModule,
+    ShopsModule,
   ],
   controllers: [],
-  providers: [OrdersService],
+  providers: [],
 })
 export class AppModule {}
