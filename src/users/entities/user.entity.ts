@@ -1,4 +1,3 @@
-// src/users/entities/user.entity.ts (pour PostgreSQL)
 import { Shop } from 'src/shops/entities/shop.entity';
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 

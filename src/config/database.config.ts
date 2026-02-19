@@ -1,15 +1,12 @@
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { registerAs } from '@nestjs/config';
 
-export const databaseConfig: TypeOrmModuleOptions = {
-  type: 'postgres',  // Changé de 'mysql' à 'postgres'
-  host: 'localhost',
-  port: 5432,  // Port par défaut de PostgreSQL
-  username: 'postgres',  // Utilisateur par défaut PostgreSQL
-  password: '',
-  database: 'shop_db',
-  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  synchronize: false, // À mettre à false en production
-  logging: true,
-  // Pour PostgreSQL, ajoutez cette option
-  uuidExtension: 'pgcrypto',
-};
+export default registerAs('database', () => ({
+  type: 'postgres', // ou 'mysql', 'mariadb', etc.
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT || '5432', 10),
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE, // assurez-vous que c'est le bon nom
+  logging: process.env.DB_LOGGING === 'true',
+  synchronize: process.env.DB_SYNC === 'true',
+}));

@@ -44,7 +44,7 @@ export class AuthService {
     };
     
     const access_token = this.jwtService.sign(payload);
-
+    console.log('User registered with email:', access_token);
     // Ne pas renvoyer le mot de passe
     const { password, ...userWithoutPassword } = savedUser;
 
@@ -86,7 +86,7 @@ export class AuthService {
 
     // Ne pas renvoyer le mot de passe
     const { password, ...userWithoutPassword } = user;
-
+    console.log('User logged in with email:', access_token);
     return {
       access_token,
       user: userWithoutPassword,
@@ -98,4 +98,12 @@ export class AuthService {
       where: { id: payload.sub } 
     });
   }
+
+  decodeToken(token: string) {
+  try {
+    return this.jwtService.decode(token); // décode sans vérifier la signature
+  } catch (e) {
+    return null;
+  }
+}
 }
