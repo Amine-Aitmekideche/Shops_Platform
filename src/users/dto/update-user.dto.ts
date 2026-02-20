@@ -1,4 +1,4 @@
-// // src/users/dto/create-user.dto.ts
+// src/users/dto/create-user.dto.ts
 // export class CreateUserDto {
 //   email: string;
 //   password: string;
@@ -8,15 +8,12 @@
 //   role?: 'super_admin' | 'admin' | 'seller' | 'customer';
 // }
 import { IsEmail, IsString, MinLength, IsOptional, IsEnum } from 'class-validator';
-import { UserRole } from '../../users/entities/user.entity';
+import { UserRole } from '../entities/user.entity';
 
-export class RegisterDto {
+export class UpdateDto {
   @IsEmail()
+  @IsOptional()
   email: string;
-
-  @IsString()
-  @MinLength(6)
-  password: string;
 
   @IsString()
   @IsOptional()

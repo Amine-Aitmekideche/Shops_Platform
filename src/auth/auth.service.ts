@@ -17,6 +17,14 @@ export class AuthService {
 
   async register(registerDto: RegisterDto): Promise<{ access_token: string; user: any }> {
     // Vérifier si l'utilisateur existe déjà
+    if (!registerDto.email || !registerDto.password ) {
+      throw new ConflictException('Email and password are required');
+    }
+
+    if (registerDto.role && !['seller', 'customer'].includes(registerDto.role)) {
+      throw new ConflictException('Invalid role specified');
+    }
+
     const existingUser = await this.usersRepository.findOne({ 
       where: { email: registerDto.email } 
     });
